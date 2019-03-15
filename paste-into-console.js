@@ -49,6 +49,9 @@ const nodeToHTML = node => {
   if ( node.size > 1 ) {
     el.style.width = `${ node.size }em !important`;
     el.style.height = `${ node.size }em !important`;
+  } else {
+    el.style.width = '0.1em !important';
+    el.style.height = '0.1em !important';
   }
   return el.outerHTML;
 };
@@ -62,28 +65,29 @@ const nodeToHTML = node => {
 const styleNode = document.createElement( 'style' );
 styleNode.type = 'text/css';
 styleNode.innerHTML = `
-div, svg, button, time, figure, figcaption,
+div, svg, time, figure, figcaption,
 p, a, h1, h2, h3, h4, h5, h6,
 img, em, strong, small, span,
-ul, ol, dd, dl, li
+ul, ol, dd, dl, li,
+button, textarea, input, form
 {
-  min-width: 1em !important;
-  min-height: 1em !important;
+  min-width: 0.2rem;
+  min-height: 0.2rem;
   width: auto !important;
-  height: auto !important;
   border: 1px solid black;
   background: transparent !important;
   display: inline-block !important;
-  margin: 0.05em !important;
-  padding: 0.2em !important;
+  margin: 0.1rem !important;
+  padding: 0 !important;
   vertical-align: top;
+  line-height: 0;
 }
 ul {
   list-style-type: none;
 }
 img, svg {
-  width: 1em !important;
-  height: 1em !important;
+  width: 1rem !important;
+  height: 1rem !important;
 }
 `;
 // p, li, a, span {
