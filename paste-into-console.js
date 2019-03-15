@@ -65,11 +65,13 @@ const nodeToHTML = node => {
 const styleNode = document.createElement( 'style' );
 styleNode.type = 'text/css';
 styleNode.innerHTML = `
-div, svg, time, figure, figcaption,
+div, time,
+svg, canvas, img, figure, figcaption,
 p, a, h1, h2, h3, h4, h5, h6,
-img, em, strong, small, span,
+em, strong, small, span,
 ul, ol, dd, dl, li,
-button, textarea, input, form
+button, textarea, input, form,
+section, main, header, footer, nav
 {
   min-width: 0.2rem;
   min-height: 0.2rem;
@@ -77,15 +79,15 @@ button, textarea, input, form
   border: 1px solid black;
   background: transparent !important;
   display: inline-block !important;
-  margin: 0.1rem !important;
-  padding: 0 !important;
+  margin: 0rem !important;
+  padding: 0.25rem !important;
   vertical-align: top;
   line-height: 0;
 }
 ul {
   list-style-type: none;
 }
-img, svg {
+img, svg, canvas, input, textarea {
   width: 1rem !important;
   height: 1rem !important;
 }
