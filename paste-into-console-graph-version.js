@@ -41,7 +41,7 @@ const pointsToLine = ( p1, p2 ) => {
 
 const pointToCircle = ( point ) => {
   const { x, y } = point;
-  return `<circle cx="${ x }" cy="${ y }" r="1" fill="none" stroke="black" />`;
+  return `<circle cx="${ x }" cy="${ y }" r="2" fill="none" stroke="black" />`;
 };
 const addIfUnique = ( elements, element ) => {
   if ( ! elements.includes( element ) ) {
@@ -53,7 +53,7 @@ const nodeToSVG = container => {
   const boundingBox = container.getBoundingClientRect();
   const points = [ ...container.querySelectorAll( '*' ) ]
     .map( node => {
-      if ( [ 'LINK', 'SCRIPT', 'STYLE' ].includes( node.tagName ) ) {
+      if ( [ 'LINK', 'SCRIPT', 'STYLE', 'OPTION' ].includes( node.tagName ) ) {
         return null;
       }
       const { x, y, width, height } = node.getBoundingClientRect();
@@ -66,17 +66,22 @@ const nodeToSVG = container => {
     .filter( point => ! isOutOfBounds( boundingBox, point ) );
 
   const svgElements = [];
-  points.forEach( point => {
+  return points.reduce( ( lastStep, point ) => lastStep.then( () => {
     addIfUnique( svgElements, pointToCircle( point ) );
 
-    points.forEach( point2 => {
-      if ( distance( point, point2 ) < 0.1 * boundingBox.height ) {
-        addIfUnique( svgElements, pointsToLine( point, point2 ) );
-      }
-    } );
-  } );
-
-    return `
+    return new Promise( resolve => setTimeout( () => {
+      points.forEach( point2 => {
+        if (
+          distance( point, point2 ) < 0.2 * boundingBox.height &&
+          distance( point, point2 ) > 100
+        ) {
+          addIfUnique( svgElements, pointsToLine( point, point2 ) );
+        }
+      } );
+      resolve();
+    }, 0 ) );
+  } ), Promise.resolve() )
+  .then( () => `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
   xmlns:svg="http://www.w3.org/2000/svg"
@@ -84,7 +89,7 @@ const nodeToSVG = container => {
   version="1.1"
 >
   ${ svgElements.map( el => `\t${ el }` ).join( '\n' ) }
-</svg>`;
+</svg>` );
 };
 
 
@@ -93,5 +98,9 @@ return {
 };
 })();
 
-copy( convert( document.body ) );
-// copy( svgify( document.body ) );
+console.time( 'generate' );
+convert( document.body ).then( svg => {
+  console.timeEnd( 'generate' );
+  console.log( 'done' );
+  window.svg = svg;
+}, err => console.error( err ) );
