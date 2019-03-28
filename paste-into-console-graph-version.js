@@ -85,11 +85,21 @@ const nodeToSVG = async container => {
   const indicator = injectProgressIndicator();
   const boundingBox = container.getBoundingClientRect();
 
-  // const maxDiagonal = distance( toPoint( 0, 0 ), toPoint( boundingBox.width, boundingBox.height ) );
+  const maxDiagonal = distance( toPoint( 0, 0 ), toPoint( boundingBox.width, boundingBox.height ) );
   // const minLineLength = 0.05 * maxDiagonal;
   // const maxLineLength = 0.15 * maxDiagonal;
-  const minLineLength = 0.15 * boundingBox.width;
-  const maxLineLength = 0.3 * boundingBox.width;
+  let minLineLength = Math.min(
+    0.05 * maxDiagonal,
+    0.1 * boundingBox.width
+  );
+  let maxLineLength = Math.min(
+    0.10 * maxDiagonal,
+    0.25 * boundingBox.width
+  );
+  if ( maxLineLength < minLineLength ) {
+    // See https://medium.com/@frontman/how-swap-two-values-without-temporary-variables-using-javascript-8bb28f96b5f6
+    maxLineLength = minLineLength + ( minLineLength = maxLineLength, 0 );
+  }
 
   const points = [ ...container.querySelectorAll( '*' ) ]
     .map( node => {
@@ -105,6 +115,7 @@ const nodeToSVG = async container => {
       return {
         x: cx,
         y: cy,
+        count: 0,
       };
     } )
     .filter( Boolean )
@@ -121,13 +132,23 @@ const nodeToSVG = async container => {
     let batchSize = 100;
     const remainingPoints = points
       .slice( currentIdx + 1 )
+      // No vertical or horizontal lines
+      .filter( ( { x, y } ) => {
+        if ( x === point.x || y === point.y ) {
+          return false;
+        }
+        return true;
+      } )
+      // No more than three lines to any one point
+      .filter( point2 => point2.count <= 3 )
       .filter( point2 => {
         const dist = distance( point, point2 );
         return dist > minLineLength && dist < maxLineLength;
       } );
 
-    // for ( let point2 of randomSampleArray( remainingPoints, 1 ) ) {
-    for ( let point2 of randomSampleArray( remainingPoints, 10 ) ) {
+    for ( let point2 of randomSampleArray( remainingPoints, 1 ) ) {
+    // for ( let point2 of randomSampleArray( remainingPoints, 4 ) ) {
+      point2.count = point2.count ? point2.count + 1 : 1;
       addIfUnique( svgElements, pointsToLine( point, point2 ) );
       batchSize -= 1;
       if ( batchSize < 0 ) {
