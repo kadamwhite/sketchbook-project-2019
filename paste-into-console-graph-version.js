@@ -15,10 +15,25 @@ const distance = ( pt1, pt2 ) => Math.sqrt(
   ( Math.abs( pt1.x - pt2.x ) ** 2 ) + ( Math.abs( pt1.y - pt2.y ) ** 2 )
 );
 
+const randomSampleArray = ( arr, count ) => {
+  if ( count >= arr.length ) {
+    return arr;
+  }
+  const clonedArr = [ ...arr ];
+  const randomElements = [];
+  while ( randomElements.length < count ) {
+    const idx = Math.floor( Math.random() * clonedArr.length );
+    randomElements.push( clonedArr.splice( idx, 1 )[ 0 ] );
+  }
+  return randomElements;
+}
+
 const omitList = [
-  'IFRAME',
   'NOSCRIPT',
   'SCRIPT',
+  'LINK',
+  'OPTION',
+  'STYLE',
 ];
 
 const isOutOfBounds = ( boundingBox, point ) => (
@@ -28,9 +43,11 @@ const isOutOfBounds = ( boundingBox, point ) => (
   point.y > boundingBox.y + boundingBox.height
 );
 
+const toPoint = ( x, y ) => ( { x, y } );
+
 const ascNumericSort = ( a, b ) => a - b;
 const pointsToLine = ( p1, p2 ) => {
-  const sortedPoints = [ p1, p2 ].sort( ( a, b ) => ascNumericSort( a.x, b.x ) );
+  const sortedPoints = [ p1, p2 ].sort( ( a, b ) => ascNumericSort( a.x * a.y, b.x * b.y ) );
   const x1 = sortedPoints[0].x;
   const y1 = sortedPoints[0].y;
   const x2 = sortedPoints[1].x;
@@ -49,39 +66,82 @@ const addIfUnique = ( elements, element ) => {
   }
 };
 
-const nodeToSVG = container => {
+const nextFrame = () => new Promise( resolve => setTimeout( resolve, 0 ) );
+
+const injectProgressIndicator = () => {
+  let indicator = document.getElementById( 'progress-indicator' );
+  if ( indicator ) {
+    return indicator;
+  }
+  indicator = document.createElement( 'script' );
+  indicator.id = 'progress-indicator';
+  indicator.type = 'text/html';
+  indicator.setAttribute( 'data-progress', '0%' );
+  document.body.append( indicator );
+  return indicator;
+}
+
+const nodeToSVG = async container => {
+  const indicator = injectProgressIndicator();
   const boundingBox = container.getBoundingClientRect();
+
+  // const maxDiagonal = distance( toPoint( 0, 0 ), toPoint( boundingBox.width, boundingBox.height ) );
+  // const minLineLength = 0.05 * maxDiagonal;
+  // const maxLineLength = 0.15 * maxDiagonal;
+  const minLineLength = 0.15 * boundingBox.width;
+  const maxLineLength = 0.3 * boundingBox.width;
+
   const points = [ ...container.querySelectorAll( '*' ) ]
     .map( node => {
-      if ( [ 'LINK', 'SCRIPT', 'STYLE', 'OPTION' ].includes( node.tagName ) ) {
+      if ( omitList.includes( node.tagName ) ) {
         return null;
       }
       const { x, y, width, height } = node.getBoundingClientRect();
+      const cx = x + width / 2;
+      const cy = y + height / 2;
+      if ( cx === 0 && cy === 0 ) {
+        return null;
+      }
       return {
-        x: x + width / 2,
-        y: y + height / 2,
+        x: cx,
+        y: cy,
       };
     } )
     .filter( Boolean )
     .filter( point => ! isOutOfBounds( boundingBox, point ) );
 
+  const increment = 1 / points.length;
+  let progress = 0;
+
   const svgElements = [];
-  return points.reduce( ( lastStep, point ) => lastStep.then( () => {
+  let currentIdx = 0;
+  for ( let point of points ) {
     addIfUnique( svgElements, pointToCircle( point ) );
 
-    return new Promise( resolve => setTimeout( () => {
-      points.forEach( point2 => {
-        if (
-          distance( point, point2 ) < 0.2 * boundingBox.height &&
-          distance( point, point2 ) > 100
-        ) {
-          addIfUnique( svgElements, pointsToLine( point, point2 ) );
-        }
+    let batchSize = 100;
+    const remainingPoints = points
+      .slice( currentIdx + 1 )
+      .filter( point2 => {
+        const dist = distance( point, point2 );
+        return dist > minLineLength && dist < maxLineLength;
       } );
-      resolve();
-    }, 0 ) );
-  } ), Promise.resolve() )
-  .then( () => `
+
+    // for ( let point2 of randomSampleArray( remainingPoints, 1 ) ) {
+    for ( let point2 of randomSampleArray( remainingPoints, 10 ) ) {
+      addIfUnique( svgElements, pointsToLine( point, point2 ) );
+      batchSize -= 1;
+      if ( batchSize < 0 ) {
+        batchSize = 100;
+        await nextFrame();
+      }
+    }
+
+    currentIdx += 1;
+    progress = progress + increment;
+    indicator.setAttribute( 'data-progress', `${ parseInt( progress * 100, 10 ) }%` );
+  }
+
+  return `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
   xmlns:svg="http://www.w3.org/2000/svg"
@@ -89,18 +149,20 @@ const nodeToSVG = container => {
   version="1.1"
 >
   ${ svgElements.map( el => `\t${ el }` ).join( '\n' ) }
-</svg>` );
+</svg>`;
 };
 
 
-return {
-  convert: nodeToSVG,
-};
+return { convert: nodeToSVG };
 })();
 
-console.time( 'generate' );
-convert( document.body ).then( svg => {
-  console.timeEnd( 'generate' );
-  console.log( 'done' );
-  window.svg = svg;
-}, err => console.error( err ) );
+console.time( 'svg created in' );
+convert( document.body )
+  .then(
+    svg => {
+      console.timeEnd( 'svg created in' );
+      console.log( 'run `copy( svg )` to pull SVG content into clipboard.' );
+      window.svg = svg;
+    },
+    err => console.error( err )
+  );
