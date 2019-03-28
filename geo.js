@@ -1,42 +1,109 @@
-const sameSign = ( a, b ) => ( a * b ) > 0;
+const equalPoint = ( x1, y1, x2, y2 ) => ( x1 === x2 && y1 === y2 );
 
-// https://gist.github.com/lengstrom/8499382
-const linesIntersect = ( l1p1, l1p2, l2p1, l2p2 ) => {
-	// Compute a1, b1, c1, where line joining points 1 and 2
-	// is "a1 x + b1 y + c1 = 0".
-	const a1 = l1p2.y - l1p1.y;
-	const b1 = l1p1.x - l1p2.x;
-	const c1 = ( l1p2.x * l1p1.y ) - ( l1p1.x * l1p2.y );
+// See https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
+const linesIntersect = ( x1, y1, x2, y2, x3, y3, x4, y4 ) => {
+	if (
+		equalPoint( x1, y1, x3, y3 ) ||
+		equalPoint( x1, y1, x4, y4 ) ||
+		equalPoint( x2, y2, x3, y3 ) ||
+		equalPoint( x2, y2, x4, y4 )
+	) {
+		return false;
+	}
+	let a_dx = x2 - x1;
+	let a_dy = y2 - y1;
+	let b_dx = x4 - x3;
+	let b_dy = y4 - y3;
+	let s = ( -a_dy * ( x1 - x3 ) + a_dx * ( y1 - y3 ) ) / ( -b_dx * a_dy + a_dx * b_dy );
+	let t = ( +b_dx * ( y1 - y3 ) - b_dy * ( x1 - x3 ) ) / ( -b_dx * a_dy + a_dx * b_dy );
+	return ( s >= 0 && s <= 1 && t >= 0 && t <= 1 );
+}
 
-	// Compute r3 and r4.
-	const r3 = ( a1 * l2p1.x ) + ( b1 * l2p1.y ) + c1;
-	const r4 = ( a1 * l2p2.x ) + ( b1 * l2p2.y ) + c1;
+const sortPoints = points => points.sort( ( a, b ) => a.x * a.y - b.x * b.y );
 
-	// Check signs of r3 and r4. If both point 3 and point 4 lie on
-	// same side of line 1, the line segments do not intersect.
-	if ( r3 !== 0 && r4 !== 0 && sameSign( r3, r4 ) ){
-		return false; //return that they do not intersect
+class Line {
+	constructor( p1x, p1y, p2x, p2y ) {
+		const [ start, end ] = sortPoints( [
+			{
+				x: p1x,
+				y: p1y,
+			},
+			{
+				x: p2x,
+				y: p2y,
+			},
+		] );
+
+		this.start = start;
+		this.p1x = start.x;
+		this.p1y = start.y;
+		this.end = end;
+		this.p2x = end.x;
+		this.p2y = end.y;
+		this.points = [ this.p1x, this.p1y, this.p2x, this.p2y ];
 	}
 
-	// Compute a2, b2, c2
-	const a2 = l2p2.y - l2p1.y;
-	const b2 = l2p1.x - l2p2.x;
-	const c2 = ( l2p2.x * l2p1.y ) - ( l2p1.x * l2p2.y );
+	intersects( shape ) {
+		if ( shape instanceof Line ) {
+			return linesIntersect( this.p1x, this.p1y, this.p2x, this.p2y, ...shape.points );
+		} else if ( shape instanceof Triangle ) {
+			for ( let line of shape.lines() ) {
+				if ( this.intersects( line ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+}
 
-	// Compute r1 and r2
-	const r1 = ( a2 * l1p1.x ) + ( b2 * l1p1.y ) + c2;
-	const r2 = ( a2 * l1p2.x ) + ( b2 * l1p2.y ) + c2;
-
-	// Check signs of r1 and r2. If both point 1 and point 2 lie
-	// on same side of second line segment, the line segments do
-	// not intersect.
-	if ( r1 !== 0 && r2 !== 0 && sameSign( r1, r2 ) ) {
-		return false; //return that they do not intersect
+class Triangle {
+	constructor( p1x, p1y, p2x, p2y, p3x, p3y ) {
+		const [ p1, p2, p3 ] = sortPoints( [
+			{
+				x: p1x,
+				y: p1y,
+			},
+			{
+				x: p2x,
+				y: p2y,
+			},
+			{
+				x: p3x,
+				y: p3y,
+			},
+		] );
+		this.p1x = p1.x;
+		this.p1y = p1.y;
+		this.p2x = p2.x;
+		this.p2y = p2.y;
+		this.p3x = p3.x;
+		this.p3y = p3.y;
+		this.l1 = new Line( p1.x, p1.y, p2.x, p2.y );
+		this.l2 = new Line( p2.x, p2.y, p3.x, p3.y );
+		this.l3 = new Line( p3.x, p3.y, p1.x, p1.y );
 	}
 
-	return true; //lines intersect, return true
+	lines() {
+		return [ this.l1, this.l2, this.l3 ];
+	}
+
+	intersects( shape ) {
+		if ( shape instanceof Line ) {
+			return shape.intersects( this );
+		} else if ( shape instanceof Triangle ) {
+			for ( let line of shape.lines() ) {
+				if ( this.intersects( line ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }
 
 module.exports = {
-  linesIntersect,
+	linesIntersect,
+	Line,
+	Triangle,
 };
