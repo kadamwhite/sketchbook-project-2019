@@ -1,3 +1,4 @@
+/* global copy:false */
 let { convert, svgify } = ( () => {
 	function sum( collection, prop ) {
 		return collection.reduce( ( sum, item ) => sum + item[prop], 0 );

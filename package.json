@@ -4,7 +4,8 @@
   "description": "",
   "main": "geo.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint . --fix",
+    "test": "jest ."
   },
   "keywords": [],
   "author": "",

@@ -1,4 +1,4 @@
-let { convert, svgify } = ( () => {
+let { convert } = ( () => {
 	function sum( collection, prop ) {
 		return collection.reduce( ( sum, item ) => sum + item[prop], 0 );
 	}
