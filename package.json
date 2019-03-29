@@ -4,6 +4,10 @@
   "description": "",
   "main": "geo.js",
   "scripts": {
+    "build": "webpack --config=webpack.config.js",
+    "connected-nodes": "npm run build && cat ./build/connected-nodes.js | xclip -selection c",
+    "triangles": "npm run build && cat ./build/triangles.js | xclip -selection c",
+    "nested-blocks": "npm run build && cat ./build/nested-blocks.js | xclip -selection c",
     "lint": "eslint . --fix",
     "test": "jest ."
   },
@@ -21,6 +25,7 @@
     "eslint-plugin-react": "^7.12.4",
     "jest": "^24.5.0",
     "react": "^16.8.6",
+    "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   }

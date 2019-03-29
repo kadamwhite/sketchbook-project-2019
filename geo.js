@@ -19,6 +19,10 @@ const linesIntersect = ( x1, y1, x2, y2, x3, y3, x4, y4 ) => {
 	return ( s >= 0 && s <= 1 && t >= 0 && t <= 1 );
 }
 
+const distance = ( x1, y1, x2, y2 ) => Math.sqrt(
+	( Math.abs( x1 - x2 ) ** 2 ) + ( Math.abs( y1 - y2 ) ** 2 )
+);
+
 const sortPoints = points => points.sort( ( a, b ) => a.x * a.y - b.x * b.y );
 
 class Line {
@@ -43,6 +47,10 @@ class Line {
 		this.points = [ this.p1x, this.p1y, this.p2x, this.p2y ];
 	}
 
+	length() {
+		return distance( this.p1x, this.p1y, this.p2x, this.p2y );
+	}
+
 	intersects( shape ) {
 		if ( shape instanceof Line ) {
 			return linesIntersect( this.p1x, this.p1y, this.p2x, this.p2y, ...shape.points );
@@ -56,6 +64,35 @@ class Line {
 		}
 	}
 }
+
+const pIsInTriangle = ( px, py, ax, ay, bx, by, cx, cy ) => {
+
+	//credit: http://www.blackpawn.com/texts/pointinpoly/default.html
+
+	const v0 = [ cx - ax, cy - ay ];
+	const v1 = [ bx - ax, by - ay ];
+	const v2 = [ px - ax, py - ay ];
+
+	const dot00 = ( v0[0] * v0[0] ) + ( v0[1] * v0[1] );
+	const dot01 = ( v0[0] * v1[0] ) + ( v0[1] * v1[1] );
+	const dot02 = ( v0[0] * v2[0] ) + ( v0[1] * v2[1] );
+	const dot11 = ( v1[0] * v1[0] ) + ( v1[1] * v1[1] );
+	const dot12 = ( v1[0] * v2[0] ) + ( v1[1] * v2[1] );
+
+	const invDenom = 1 / ( dot00 * dot11 - dot01 * dot01 );
+
+	const u = ( dot11 * dot02 - dot01 * dot12 ) * invDenom;
+	const v = ( dot00 * dot12 - dot01 * dot02 ) * invDenom;
+
+	return ( ( u >= 0 ) && ( v >= 0 ) && ( u + v < 1 ) );
+}
+
+const isPoint = val => {
+	if ( ! val || typeof val === 'number' ) {
+		return false;
+	}
+	return val.x !== undefined && val.y !== undefined;
+};
 
 class Triangle {
 	constructor( p1x, p1y, p2x, p2y, p3x, p3y ) {
@@ -79,9 +116,18 @@ class Triangle {
 		this.p2y = p2.y;
 		this.p3x = p3.x;
 		this.p3y = p3.y;
+		this.points = [ p1.x, p1.y, p2.x, p2.y, p3.x, p3.y ];
 		this.l1 = new Line( p1.x, p1.y, p2.x, p2.y );
 		this.l2 = new Line( p2.x, p2.y, p3.x, p3.y );
 		this.l3 = new Line( p3.x, p3.y, p1.x, p1.y );
+	}
+
+	contains( x, y ) {
+		return pIsInTriangle(
+			isPoint( x ) ? x.x : x,
+			isPoint( y ) ? x.y : y,
+			...this.points
+		);
 	}
 
 	lines() {
@@ -102,7 +148,20 @@ class Triangle {
 	}
 }
 
+const toPoint = ( x, y ) => ( { x, y } );
+
+const ascending = ( accessor = val => val ) => ( a, b ) => accessor( a ) - accessor( b );
+
+// Given an x,y point and a collection of same, find the count closest.
+const findNearestPoints = ( p1, collection, count ) => collection
+	.sort( ascending( p2 => distance( p1.x, p1.y, p2.x, p2.y ) ) )
+	.slice( 0, count );
+
 module.exports = {
+	distance,
+	toPoint,
+	isPoint,
+	findNearestPoints,
 	linesIntersect,
 	Line,
 	Triangle,

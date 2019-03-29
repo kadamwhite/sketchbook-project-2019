@@ -1,4 +1,5 @@
 const {
+	findNearestPoints,
 	linesIntersect,
 	Line,
 	Triangle,
@@ -121,6 +122,37 @@ describe( 'geo', () => {
 				expect( tri1.intersects( tri2 ) ).toBe( false );
 				expect( tri2.intersects( tri1 ) ).toBe( false );
 			} );
+		} );
+
+		describe( '#contains', () => {
+			it( 'returns true if a point lies within a triangle', () => {
+				const tri = new Triangle( -1, 0, 0, 2, 1, 0 );
+				expect( tri.contains( 0, 1 ) ).toBe( true );
+			} );
+
+			it( 'returns true if a point lies outside a triangle', () => {
+				expect( tri1.contains( 4, 1 ) ).toBe( false );
+			} );
+		} );
+	} );
+
+	describe( 'findNearestPoints', () => {
+		it( 'returns the specifed number of nearest points in the array', () => {
+			const pt = { x: 0, y: 0 };
+			const coll = [
+				{ x: 1, y: 7 },
+				{ x: 1, y: 0.25 },
+				{ x: 1, y: 1 },
+				{ x: 0, y: 1 },
+				{ x: -1, y: 0 },
+				{ x: 2, y: 0 },
+				{ x: 1, y: 4 },
+			];
+			expect( findNearestPoints( pt, coll, 3 ) ).toEqual( [
+				{ x: 0, y: 1 },
+				{ x: -1, y: 0 },
+				{ x: 1, y: 0.25 },
+			] );
 		} );
 	} );
 

@@ -1,0 +1,1 @@
+`npm run triangles` : copy the triangles JS into the clipboard. Paste this into the devtools console, then run `copy( svg )` in the repl to copy the SVG content to the clipboard. Paste that into an SVG file and preview in inkscape.

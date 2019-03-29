@@ -1,4 +1,5 @@
 /* global copy:false */
+const svg = require( './svg' );
 let { convert, svgify } = ( () => {
 	function sum( collection, prop ) {
 		return collection.reduce( ( sum, item ) => sum + item[prop], 0 );
@@ -115,15 +116,10 @@ img, svg, canvas, input, textarea {
 			[ ...node.children ].forEach( svgifyNode );
 		}
 		svgifyNode( node );
-		return `
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-  xmlns:svg="http://www.w3.org/2000/svg"
-  viewBox="0 0 ${ max.x } ${ max.y }"
-  version="1.1"
->
-  ${ rects.join( '\n' ) }
-</svg>`;
+		return svg.render( {
+			width: max.x,
+			height: max.y,
+		}, rects );
 	}
 
 	return {
