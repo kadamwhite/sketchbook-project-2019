@@ -140,7 +140,7 @@ class Triangle {
 		);
 	}
 
-	distance( tri ) {
+	closestPoints( tri ) {
 		return [
 			[ this.p1x, this.p1y, tri.p1x, tri.p1y ],
 			[ this.p1x, this.p1y, tri.p2x, tri.p2y ],
@@ -152,9 +152,25 @@ class Triangle {
 			[ this.p3x, this.p3y, tri.p2x, tri.p2y ],
 			[ this.p3x, this.p3y, tri.p3x, tri.p3y ],
 		].reduce(
-			( minimum, points ) => Math.min( minimum, distance( ...points ) ),
-			Infinity
+			( minimum, points ) => {
+				const dist = distance( ...points );
+				if ( dist < minimum.distance ) {
+					return {
+						points,
+						distance: dist,
+					};
+				}
+				return minimum;
+			},
+			{
+				points: null,
+				distance: Infinity,
+			},
 		);
+	}
+
+	distance( tri ) {
+		return this.closestPoints( tri ).distance;
 	}
 
 	area() {
