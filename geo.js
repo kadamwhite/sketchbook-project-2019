@@ -1,5 +1,7 @@
 const equalPoint = ( x1, y1, x2, y2 ) => ( x1 === x2 && y1 === y2 );
 
+const sum = nums => nums.reduce( ( sum, num ) => sum + num, 0 );
+
 // See https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
 const linesIntersect = ( x1, y1, x2, y2, x3, y3, x4, y4 ) => {
 	if (
@@ -136,6 +138,29 @@ class Triangle {
 			isPoint( y ) ? x.y : y,
 			...this.points
 		);
+	}
+
+	distance( tri ) {
+		return [
+			[ this.p1x, this.p1y, tri.p1x, tri.p1y ],
+			[ this.p1x, this.p1y, tri.p2x, tri.p2y ],
+			[ this.p1x, this.p1y, tri.p3x, tri.p3y ],
+			[ this.p2x, this.p2y, tri.p1x, tri.p1y ],
+			[ this.p2x, this.p2y, tri.p2x, tri.p2y ],
+			[ this.p2x, this.p2y, tri.p3x, tri.p3y ],
+			[ this.p3x, this.p3y, tri.p1x, tri.p1y ],
+			[ this.p3x, this.p3y, tri.p2x, tri.p2y ],
+			[ this.p3x, this.p3y, tri.p3x, tri.p3y ],
+		].reduce(
+			( minimum, points ) => Math.min( minimum, distance( ...points ) ),
+			Infinity
+		);
+	}
+
+	area() {
+		const sides = this.lines().map( l => l.length() );
+		const s = sum( sides ) / 2;
+		return Math.sqrt( s * ( s - sides[0] ) * ( s - sides[1] ) * ( s - sides[2] ) );
 	}
 
 	lines() {

@@ -82,6 +82,20 @@ describe( 'geo', () => {
 			tri1 = new Triangle( 0, 0, 1, 1, 1, 0 );
 		} );
 
+		describe( '#area', () => {
+			it( 'returns the area of the triangle', () => {
+				// %@#! floating point math...
+				expect( tri1.area().toFixed( 1 ) ).toBe( '0.5' );
+			} );
+		} );
+
+		describe( '#distance', () => {
+			it( 'returns the distance between the triangles', () => {
+				const tri2 = new Triangle( 2, 0, 3, 1, 3, 0 );
+				expect( tri1.distance( tri2 ) ).toBe( 1 );
+			} );
+		} );
+
 		describe( '#intersects', () => {
 			it( 'returns true when passed an intersecting Line', () => {
 				const line = new Line( 0, 1, 1, 0 );
