@@ -94,6 +94,14 @@ const isPoint = val => {
 	return val.x !== undefined && val.y !== undefined;
 };
 
+class Circle {
+	constructor( cx, cy, r = 2 ) {
+		this.cx = cx;
+		this.cy = cy;
+		this.r = r;
+	}
+}
+
 class Triangle {
 	constructor( p1x, p1y, p2x, p2y, p3x, p3y ) {
 		const [ p1, p2, p3 ] = sortPoints( [
@@ -163,6 +171,7 @@ module.exports = {
 	isPoint,
 	findNearestPoints,
 	linesIntersect,
+	Circle,
 	Line,
 	Triangle,
 };
