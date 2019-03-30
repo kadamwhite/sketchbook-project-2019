@@ -3,23 +3,25 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 
 module.exports = {
 	mode: 'production',
-	// devtool: false,
-	devtool: 'cheap-module-eval-source-map',
+	devtool: false,
+	// devtool: 'cheap-module-eval-source-map',
 	optimization: {
 		minimizer: [ new TerserPlugin( {
 			terserOptions: {
-				mangle: false,
+				// mangle: false,
 				output: {
-					beautify: true,
-					semicolons: false,
+					// beautify: true,
+					// semicolons: false,
 				},
 			},
 		} ) ],
 	},
 	entry: {
+		'lines': './a-bunch-of-lines',
 		'nested-blocks': './paste-into-console',
 		'connected-nodes': './paste-into-console-graph-version',
 		'triangles': './paste-into-console-tri-version',
+		'arbitrary-triangles': './arbitrary-triangles',
 	},
 	output: {
 		filename: '[name].js',

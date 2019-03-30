@@ -8,6 +8,8 @@
     "connected-nodes": "npm run build && cat ./build/connected-nodes.js | xclip -selection c",
     "triangles": "npm run build && cat ./build/triangles.js | xclip -selection c",
     "nested-blocks": "npm run build && cat ./build/nested-blocks.js | xclip -selection c",
+    "arbitrary-triangles": "npm run build && cat ./build/arbitrary-triangles.js | xclip -selection c",
+    "lines": "npm run build && cat ./build/lines.js | xclip -selection c",
     "lint": "eslint . --fix",
     "test": "jest ."
   },

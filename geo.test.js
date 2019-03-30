@@ -113,6 +113,13 @@ describe( 'geo', () => {
 				expect( tri2.intersects( tri1 ) ).toBe( true );
 			} );
 
+			it( 'returns true when passed another intersecting triangle', () => {
+				const tri2 = new Triangle( 294, 181, 284, 211, 304, 226 );
+				const tri3 = new Triangle( 304, 201, 307, 202, 291, 217 );
+				expect( tri2.intersects( tri3 ) ).toBe( true );
+				expect( tri3.intersects( tri2 ) ).toBe( true );
+			} );
+
 			it( 'returns false when passed a non-intersecting Triangle', () => {
 				const tri2 = new Triangle( 2, 0, 3, 1, 3, 0 );
 				expect( tri1.intersects( tri2 ) ).toBe( false );

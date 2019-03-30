@@ -21,12 +21,13 @@ const circle = ( shape, radius = 2 ) => {
 	/>` );
 };
 
-const line = line => removeLinebreaks( `<line
+const line = ( line, otherProps = '' ) => removeLinebreaks( `<line
 	x1="${ line.p1x }"
 	y1="${ line.p1y }"
 	x2="${ line.p2x }"
 	y2="${ line.p2y }"
 	style="fill:none;stroke:black;stroke-width:1;"
+	${ otherProps ? otherProps : '' }
 />` );
 
 const lineFromPoints = ( p1, p2 ) => line( new Line( p1.x, p1.y, p2.x, p2.y ) );
