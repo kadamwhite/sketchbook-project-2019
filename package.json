@@ -5,11 +5,13 @@
   "main": "geo.js",
   "scripts": {
     "build": "webpack --config=webpack.config.js",
-    "connected-nodes": "npm run build && cat ./build/connected-nodes.js | xclip -selection c",
-    "triangles": "npm run build && cat ./build/triangles.js | xclip -selection c",
-    "nested-blocks": "npm run build && cat ./build/nested-blocks.js | xclip -selection c",
     "arbitrary-triangles": "npm run build && cat ./build/arbitrary-triangles.js | xclip -selection c",
+    "blobs": "npm run build && cat ./build/blobs.js | xclip -selection c",
+    "connected-nodes": "npm run build && cat ./build/connected-nodes.js | xclip -selection c",
     "lines": "npm run build && cat ./build/lines.js | xclip -selection c",
+    "nested-blocks": "npm run build && cat ./build/nested-blocks.js | xclip -selection c",
+    "triangles": "npm run build && cat ./build/triangles.js | xclip -selection c",
+    "voronoi": "npm run build && cat ./build/voronoi.js | xclip -selection c",
     "lint": "eslint . --fix",
     "test": "jest ."
   },
@@ -18,6 +20,8 @@
   "license": "ISC",
   "devDependencies": {
     "babel-eslint": "^10.0.1",
+    "d3-shape": "^1.3.5",
+    "d3-voronoi": "^1.1.4",
     "eslint": "^5.15.3",
     "eslint-config-humanmade": "^0.5.0",
     "eslint-config-react-app": "^3.0.8",

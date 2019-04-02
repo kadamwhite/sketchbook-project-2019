@@ -41,17 +41,43 @@ const triangle = ( tri, otherProps = '' ) => removeLinebreaks( `<polygon
 	${ otherProps ? otherProps : '' }
 />` );
 
+const shapeToPath = shape => {
+	console.log( shape );
+	let points;
+	if ( shape instanceof Triangle ) {
+		points = [
+			[ shape.p1x, shape.p1y ],
+			[ shape.p2x, shape.p2y ],
+			[ shape.p3x, shape.p3y ],
+		];
+	} else {
+		points = shape;
+	}
+	return `M${ points.join( 'L') }Z`;
+}
+
 const shapeToCurvedPath = shape => {
 	console.log( shape );
-	let points = [
-		[ shape.p1x, shape.p1y ],
-		[ shape.p2x, shape.p2y ],
-		[ shape.p3x, shape.p3y ],
-	];
+	let points;
+	if ( shape instanceof Triangle ) {
+		points = [
+			[ shape.p1x, shape.p1y ],
+			[ shape.p2x, shape.p2y ],
+			[ shape.p3x, shape.p3y ],
+		];
+	} else {
+		points = shape;
+	}
 	const line = d3.line();
 	line.curve( d3.curveBasisClosed );
 	return line( points );
 }
+
+const shape = ( shape, otherProps = '' ) => removeLinebreaks( `<path
+	d=${ shapeToPath( shape ) }
+	style="fill:none;stroke:black;stroke-width:1;"
+	${ otherProps ? otherProps : '' }
+/>` );
 
 const blob = ( shape, otherProps = '' ) => removeLinebreaks( `<path
 	d=${ shapeToCurvedPath( shape ) }
@@ -83,4 +109,5 @@ module.exports = {
 	triangle,
 	add,
 	render,
+	shape,
 };
