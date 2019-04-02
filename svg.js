@@ -1,8 +1,10 @@
 const {
 	Line,
+	Triangle,
 } = require( './geo' );
+const d3 = require( 'd3-shape' );
 
-const removeLinebreaks = str => str.replace( /\n\t*/g, ' ' );
+const removeLinebreaks = str => str.replace( /\n\t*/g, ' ' ).replace( /\s+(\/?)>$/, ' $1>' );
 
 /**
  * Convert a Point or a Circle into a line.
@@ -33,9 +35,28 @@ const line = ( line, otherProps = '' ) => removeLinebreaks( `<line
 const lineFromPoints = ( p1, p2 ) => line( new Line( p1.x, p1.y, p2.x, p2.y ) );
 
 const xyPair = ( x, y ) => `${ x },${ y }`;
-const triangle = tri => removeLinebreaks( `<polygon
+const triangle = ( tri, otherProps = '' ) => removeLinebreaks( `<polygon
 	points="${ xyPair( tri.p1x, tri.p1y ) } ${ xyPair( tri.p2x, tri.p2y ) } ${ xyPair( tri.p3x, tri.p3y ) } ${ xyPair( tri.p1x, tri.p1y ) }"
 	style="fill:none;stroke:black;stroke-width:1;"
+	${ otherProps ? otherProps : '' }
+/>` );
+
+const shapeToCurvedPath = shape => {
+	console.log( shape );
+	let points = [
+		[ shape.p1x, shape.p1y ],
+		[ shape.p2x, shape.p2y ],
+		[ shape.p3x, shape.p3y ],
+	];
+	const line = d3.line();
+	line.curve( d3.curveBasisClosed );
+	return line( points );
+}
+
+const blob = ( shape, otherProps = '' ) => removeLinebreaks( `<path
+	d=${ shapeToCurvedPath( shape ) }
+	style="fill:none;stroke:black;stroke-width:1;"
+	${ otherProps ? otherProps : '' }
 />` );
 
 const elements = [];
@@ -55,6 +76,7 @@ ${ ( els || elements ).map( el => `\t${ el }` ).join( '\n' ) }
 </svg>`.replace( /^\n/, '' );
 
 module.exports = {
+	blob,
 	circle,
 	line,
 	lineFromPoints,

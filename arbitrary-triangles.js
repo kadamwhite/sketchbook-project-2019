@@ -40,9 +40,9 @@ const intersects = ( newTri, tris ) => {
 
 ( async () => {
 	const tris = [];
-	while ( tris.length < 50 ) {
+	while ( tris.length < 10 ) {
 		const newTri = tri();
-		if ( newTri.area() >= 40 && ! intersects( newTri, tris ) ) {
+		if ( newTri.area() >= range && ! intersects( newTri, tris ) ) {
 			tris.push( newTri );
 			svg.add( svg.triangle( newTri ) );
 		}
